@@ -1,0 +1,84 @@
+{
+    "prices": [
+        {
+            "city": "Paris",
+            "iataCode": "PAR",
+            "lowestPrice": 6104
+        },
+        {
+            "city": "Frankfurt",
+            "iataCode": "FRA",
+            "lowestPrice": 4794
+        },
+        {
+            "city": "Tokyo",
+            "iataCode": "",
+            "lowestPrice": 100000
+        },
+        {
+            "city": "Hong Kong",
+            "iataCode": "",
+            "lowestPrice": 100000
+        },
+        {
+            "city": "Istanbul",
+            "iataCode": "IST",
+            "lowestPrice": 11131
+        },
+        {
+            "city": "Kuala Lumpur",
+            "iataCode": "",
+            "lowestPrice": 100000
+        },
+        {
+            "city": "New York",
+            "iataCode": "NYC",
+            "lowestPrice": 6939
+        },
+        {
+            "city": "San Francisco",
+            "iataCode": "SFO",
+            "lowestPrice": 8084
+        },
+        {
+            "city": "Dublin",
+            "iataCode": "DBN",
+            "lowestPrice": 100000
+        },
+        {
+            "city": "Beijing",
+            "iataCode": "BJS",
+            "lowestPrice": 8158
+        },
+        {
+            "city": "Belo Horizonte",
+            "iataCode": "",
+            "lowestPrice": 100000
+        },
+        {
+            "city": "Buenos Aires",
+            "iataCode": "",
+            "lowestPrice": 100000
+        },
+        {
+            "city": "London",
+            "iataCode": "LON",
+            "lowestPrice": 9218
+        },
+        {
+            "city": "Rio de Janeiro",
+            "iataCode": "",
+            "lowestPrice": 100000
+        },
+        {
+            "city": "Toronto",
+            "iataCode": "",
+            "lowestPrice": 100000
+        },
+        {
+            "city": "Manila",
+            "iataCode": "MNL",
+            "lowestPrice": 7466
+        }
+    ]
+}

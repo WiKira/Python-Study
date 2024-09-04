@@ -21,6 +21,7 @@ https://www.kaggle.com/lava18/google-play-store-apps).
 
 import pandas as pd
 import plotly.express as px
+import numpy as np
 
 """# Notebook Presentation"""
 
@@ -274,4 +275,143 @@ fig = px.bar(genre_app, x=genre_app.index, y=genre_app.values, color=genre_app.v
              width=1210, height=720)
 fig.update_layout(coloraxis_showscale=False)
 fig.show()
+
+"""# Grouped Bar Charts: Free vs. Paid Apps per Category"""
+
+type_category = df_apps_clean[["App", "Category", "Type"]].groupby(['Category', 'Type'], as_index=False).agg({'App' : pd.Series.count})
+type_category
+
+fig = px.histogram(type_category,
+                   x=type_category["Category"],
+                   y=type_category["App"],
+                   color=type_category['Type'],
+                   title='Free vs Paid Apps by Category',
+                   barmode='group')
+
+fig.show()
+
+"""**Challenge**: Use the plotly express bar [chart examples](https://plotly.com/python/bar-charts/#bar-chart-with-sorted-or-ordered-categories) and the [.bar() API reference](https://plotly.com/python-api-reference/generated/plotly.express.bar.html#plotly.express.bar) to create this bar chart:
+
+<img src=https://imgur.com/LE0XCxA.png>
+
+You'll want to use the `df_free_vs_paid` DataFrame that you created above that has the total number of free and paid apps per category.
+
+See if you can figure out how to get the look above by changing the `categoryorder` to 'total descending' as outlined in the documentation here [here](https://plotly.com/python/categorical-axes/#automatically-sorting-categories-by-name-or-total-value).
+"""
+
+type_category = df_apps_clean[["App", "Category", "Type"]].groupby(['Category', 'Type'], as_index=False).agg({'App' : pd.Series.count})
+type_category
+
+fig = px.histogram(type_category,
+                   x=type_category["Category"],
+                   y=type_category["App"],
+                   color=type_category['Type'],
+                   title='Free vs Paid Apps by Category',
+                   barmode='group')
+
+fig.update_xaxes(categoryorder='total descending')
+
+fig.update_layout(yaxis=dict(type='log'))
+
+fig.update_layout(xaxis_title='Category',
+                  yaxis_title='Number of Apps')
+
+
+fig.show()
+
+"""# Plotly Box Plots: Lost Downloads for Paid Apps
+
+**Challenge**: Create a box plot that shows the number of Installs for free versus paid apps. How does the median number of installations compare? Is the difference large or small?
+
+Use the [Box Plots Guide](https://plotly.com/python/box-plots/) and the [.box API reference](https://plotly.com/python-api-reference/generated/plotly.express.box.html) to create the following chart.
+
+<img src=https://imgur.com/uVsECT3.png>
+
+"""
+
+df_type_installs = df_apps_clean[["Type", "Installs"]]
+df_type_installs
+
+fig = px.box(df_type_installs, x=df_type_installs["Type"], y=df_type_installs["Installs"], points="all",
+             color=df_type_installs["Type"],notched=True,
+             title='How Many Downloads are Paid Apps Giving Up?',
+             width=720)
+
+fig.update_layout(yaxis=dict(type='log'))
+
+
+fig.show()
+
+"""# Plotly Box Plots: Revenue by App Category
+
+**Challenge**: See if you can generate the chart below:
+
+<img src=https://imgur.com/v4CiNqX.png>
+
+Looking at the hover text, how much does the median app earn in the Tools category? If developing an Android app costs $30,000 or thereabouts, does the average photography app recoup its development costs?
+
+Hint: I've used 'min ascending' to sort the categories.
+"""
+
+df_category_revenue = df_apps_clean[df_apps_clean["Type"] == "Paid"]
+df_category_revenue = df_category_revenue[["Category", "Revenue_Estimate"]]
+df_category_revenue
+
+mean_revenue = np.round(df_category_revenue.Revenue_Estimate.median(), 2)
+
+fig = px.box(df_category_revenue, x=df_category_revenue["Category"],
+             y=df_category_revenue["Revenue_Estimate"],
+             title='How Much Can Paid Apps Earn?')
+
+fig.add_hline(y=mean_revenue, line_width=2, line_dash="dot",
+              line_color="red")
+
+fig.add_annotation(x=df_category_price["Category"].nunique()-2, y=np.log10(mean_revenue)-0.2,
+                   text=f"Mean Revenue: ${mean_revenue} ",
+                   font_size=12,
+                   font_color="red",
+                   showarrow=False)
+
+fig.update_layout(yaxis=dict(type='log'),
+                 xaxis_title='Category',
+                 yaxis_title='Paid App Ballpark Revenue')
+
+fig.update_xaxes(categoryorder='min ascending',)
+
+fig.show()
+
+"""# How Much Can You Charge? Examine Paid App Pricing Strategies by Category
+
+**Challenge**: What is the median price price for a paid app? Then compare pricing by category by creating another box plot. But this time examine the prices (instead of the revenue estimates) of the paid apps. I recommend using `{categoryorder':'max descending'}` to sort the categories.
+"""
+
+df_category_price = df_apps_clean[df_apps_clean["Type"] == "Paid"]
+df_category_price = df_category_price[["Category", "Price"]]
+df_category_price
+
+mean_price = np.round(df_category_price.Price.median(), 2)
+
+fig = px.box(df_category_price, x=df_category_price["Category"],
+             y=df_category_price["Price"],
+             title='Price per Category',
+             height=800)
+
+fig.add_hline(y=mean_price, line_width=2, line_dash="dot",
+              line_color="red")
+
+fig.add_annotation(x=df_category_price["Category"].nunique()-2, y=np.log10(mean_price)+0.05,
+                   text=f"Mean Price: ${mean_price} ",
+                   font_size=12,
+                   font_color="red",
+                   showarrow=False)
+
+fig.update_layout(yaxis=dict(type='log'),
+                  xaxis_title='Category',
+                  yaxis_title='Paid App Price')
+
+fig.update_xaxes(categoryorder='max descending')
+
+fig.show()
+
+
 

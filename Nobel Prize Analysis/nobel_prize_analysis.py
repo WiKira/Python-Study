@@ -404,11 +404,24 @@ plt.show()
 * What is the ranking for the top 20 countries in terms of the number of prizes?
 """
 
+df_data[["birth_country", "birth_country_current", "organization_country"]].isna().sum()
 
+top20_countries = df_data["birth_country_current"].value_counts()
+top20_countries.sort_values(ascending=False, inplace=True)
+top20_countries = top20_countries[:20]
+top20_countries
 
+fig = px.bar(top20_countries,
+             x=top20_countries.values,
+             y=top20_countries.index,
+             color=top20_countries.values,
+             color_continuous_scale='viridis',
+             title="Top 20 countries by Number of Prizes")
 
-
-
+fig.update_layout(xaxis_title='Number of Prizes',
+                  yaxis_title='Country',
+                  yaxis={'categoryorder':'total ascending'}, coloraxis_showscale=False)
+fig.show()
 
 
 
@@ -426,9 +439,16 @@ Hint: You'll need to use a 3 letter country code for each country.
 
 """
 
+countries_prizes = df_data[["ISO", "birth_country_current", "prize"]].groupby(["ISO", "birth_country_current"]).agg({"prize": pd.Series.count })
+countries_prizes.sort_values("prize", ascending=False, inplace=True)
+countries_prizes = countries_prizes.reset_index()
+countries_prizes
 
-
-
+fig = px.choropleth(countries_prizes, locations=countries_prizes['ISO'],
+                    color=countries_prizes['prize'],
+                    hover_name=countries_prizes['birth_country_current'], # column to add to hover information
+                    color_continuous_scale=px.colors.sequential.OrRd)
+fig.show()
 
 
 
@@ -459,9 +479,37 @@ The hard part is preparing the data for this chart!
 
 """
 
+top20_countries_category = df_data[["birth_country_current", "category"]].value_counts()
+top20_countries_category = top20_countries_category.reset_index()
+top20_countries_category
 
+top20_countries = df_data["birth_country_current"].value_counts()
+top20_countries.sort_values(ascending=False, inplace=True)
+top20_countries = top20_countries[:20]
+top20_countries
 
+top20_countries_category = top20_countries_category[top20_countries_category["birth_country_current"].isin(top20_countries.index)]
 
+top20_countries_category.sort_values(['birth_country_current', 'count'], ascending=False, inplace=True)
+top20_countries_category
+
+merged_df = pd.merge(top20_countries_category, top20_countries, on='birth_country_current')
+
+merged_df.columns = ['birth_country_current', 'category', 'cat_prize', 'total_prize']
+merged_df.sort_values(by=['total_prize', 'cat_prize'], inplace=True, ascending=False)
+merged_df
+
+fig = px.bar(merged_df,
+             x=merged_df['cat_prize'],
+             y=merged_df['birth_country_current'],
+             color=merged_df["category"],
+             hover_data=[merged_df['total_prize']],
+             title="Top 20 countries by Number of Prizes")
+
+fig.update_layout(xaxis_title='Number of Prizes',
+                  yaxis_title='Country',
+                  yaxis={'categoryorder':'total ascending'}, coloraxis_showscale=False)
+fig.show()
 
 
 
@@ -479,15 +527,34 @@ The hard part is preparing the data for this chart!
 * Create a [plotly line chart](https://plotly.com/python/line-charts/) where each country is a coloured line.
 """
 
+countries_year = df_data[["birth_country_current", "year"]].value_counts()
+countries_year = countries_year.reset_index()
+countries_year.sort_values(['year'], ascending=True, inplace=True)
+countries_year['cumprizes'] = countries_year.groupby(['birth_country_current'])['count'].cumsum()
+countries_year
 
+fig = px.line(countries_year, x=countries_year["year"], y=countries_year["cumprizes"], color=countries_year["birth_country_current"], title='Number of Prizes Won by Each Country Over Time')
+fig.show()
 
+prize_by_year = df_data.groupby(by=['birth_country_current', 'year'], as_index=False).count()
+prize_by_year = prize_by_year.sort_values('year')[['year', 'birth_country_current', 'prize']]
+prize_by_year
 
+cumulative_prizes = prize_by_year.groupby(by=['birth_country_current',
+                                              'year']).sum().groupby(level=[0]).cumsum()
+cumulative_prizes.reset_index(inplace=True)
+cumulative_prizes
 
+l_chart = px.line(cumulative_prizes,
+                  x='year',
+                  y='prize',
+                  color='birth_country_current',
+                  hover_name='birth_country_current')
 
+l_chart.update_layout(xaxis_title='Year',
+                      yaxis_title='Number of Prizes')
 
-
-
-
+l_chart.show()
 
 
 
@@ -501,15 +568,20 @@ The hard part is preparing the data for this chart!
 * How many Nobel prize winners are affiliated with the University of Chicago and Harvard University?
 """
 
+top20_orgs = df_data["organization_name"].value_counts()
+top20_orgs.sort_values(ascending=False, inplace=True)
+top20_orgs = top20_orgs[:20]
+top20_orgs
+
+fig = px.bar(x=top20_orgs.values, y=top20_orgs.index, color=top20_orgs.values, color_continuous_scale='viridis')
+fig.update_layout(yaxis={'categoryorder':'total ascending'}, coloraxis_showscale=False)
+fig.show()
 
 
 
 
 
-
-
-
-
+df_data
 
 """# Which Cities Make the Most Discoveries?
 
@@ -521,9 +593,17 @@ Where do major discoveries take place?
 * Which city in Europe has had the most discoveries?
 """
 
+top20_cities_org = df_data['organization_city'].value_counts()
+top20_cities_org = top20_cities_org.reset_index()
+top20_cities_org['organization_city'] = top20_cities_org['organization_city'].str.split(',').str.get(0)
+top20_cities_org = top20_cities_org.groupby("organization_city").sum()
+top20_cities_org.sort_values('count' ,ascending=False, inplace=True)
+top20_cities_org = top20_cities_org[:20]
+top20_cities_org
 
-
-
+fig = px.bar(x=top20_cities_org["count"], y=top20_cities_org.index, color=top20_cities_org["count"], color_continuous_scale='viridis')
+fig.update_layout(yaxis={'categoryorder':'total ascending'}, coloraxis_showscale=False)
+fig.show()
 
 """# Where are Nobel Laureates Born? Chart the Laureate Birth Cities
 
@@ -536,9 +616,19 @@ Where do major discoveries take place?
 
 """
 
+df_data
 
+top20_cities_birth = df_data['birth_city'].value_counts()
+top20_cities_birth = top20_cities_birth.reset_index()
+top20_cities_birth['birth_city'] = top20_cities_birth['birth_city'].str.split(',').str.get(0)
+top20_cities_birth = top20_cities_birth.groupby("birth_city").sum()
+top20_cities_birth.sort_values('count' ,ascending=False, inplace=True)
+top20_cities_birth = top20_cities_birth[:20]
+top20_cities_birth
 
-
+fig = px.bar(x=top20_cities_birth["count"], y=top20_cities_birth.index, color=top20_cities_birth["count"], color_continuous_scale='viridis')
+fig.update_layout(yaxis={'categoryorder':'total ascending'}, coloraxis_showscale=False)
+fig.show()
 
 """# Plotly Sunburst Chart: Combine Country, City, and Organisation
 
@@ -556,9 +646,23 @@ Here's what you're aiming for:
 
 """
 
+country_city_org = df_data.groupby(by=['organization_country',
+                                       'organization_city',
+                                       'organization_name'], as_index=False).agg({'prize': pd.Series.count})
 
+country_city_org = country_city_org.sort_values('prize', ascending=False)
+country_city_org['organization_city'] = country_city_org['organization_city'].str.split(',').str.get(0)
+country_city_org = country_city_org.groupby(['organization_country',
+                                             'organization_city',
+                                             'organization_name'], as_index=False).sum()
+country_city_org = country_city_org.sort_values('prize', ascending=False)
+country_city_org
 
-
+fig = px.sunburst(country_city_org,
+                  path=['organization_country', 'organization_city', 'organization_name'],
+                  values=country_city_org['prize']
+                  )
+fig.show()
 
 
 

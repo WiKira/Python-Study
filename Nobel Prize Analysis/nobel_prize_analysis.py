@@ -675,9 +675,13 @@ How Old Are the Laureates When the Win the Prize?
 
 """
 
+df_data
 
+birth_years = df_data.birth_date.dt.year
 
+df_data["winning_age"] = df_data["year"] - birth_years
 
+df_data
 
 
 
@@ -691,9 +695,19 @@ How Old Are the Laureates When the Win the Prize?
 * Use Seaborn to [create histogram](https://seaborn.pydata.org/generated/seaborn.histplot.html) to visualise the distribution of laureate age at the time of winning. Experiment with the number of `bins` to see how the visualisation changes.
 """
 
+df_data.iloc[df_data["winning_age"].idxmax()]
 
+df_data.iloc[df_data["winning_age"].idxmin()]
 
+df_data.describe()
 
+plt.figure(figsize=(8, 4), dpi=200)
+sns.histplot(data=df_data,
+             x=df_data.winning_age,
+             bins=30)
+plt.xlabel('Age')
+plt.title('Distribution of Age on Receipt of Prize')
+plt.show()
 
 """### Descriptive Statistics for the Laureate Age at Time of Award
 
@@ -719,7 +733,19 @@ Are Nobel laureates being nominated later in life than before? Have the ages of 
 
 """
 
+plt.figure(figsize=(8, 4), dpi=200)
 
+sns.regplot(data=df_data,
+            x=df_data["year"],
+            y=df_data["winning_age"],
+            lowess=True,
+            scatter_kws = {'alpha': 0.4},
+            line_kws=dict(color="black"))
+
+plt.xlabel('Year')
+plt.ylabel('Age')
+plt.title('Distribution of Age on Receipt of Prize by Years')
+plt.show()
 
 
 
@@ -732,7 +758,14 @@ How does the age of laureates vary by category?
 * In which prize category are the average winners the youngest?
 """
 
+plt.figure(figsize=(8, 4), dpi=200)
 
+sns.boxplot(df_data, x=df_data["category"], y=df_data["winning_age"], hue=df_data["category"])
+
+plt.xlabel('Category')
+plt.ylabel('Age')
+plt.title('Distribution of Age on Receipt of Prize by Categories')
+plt.show()
 
 
 
@@ -745,9 +778,35 @@ How does the age of laureates vary by category?
 
 """
 
+with sns.axes_style('darkgrid'):
+  lm = sns.lmplot(df_data,
+                  x="year",
+                  y="winning_age",
+                  col="category",
+                  lowess=True,
+                  scatter_kws = {'alpha': 0.4},
+                  aspect=0.8,
+                  line_kws=dict(color="black")
+                  )
 
+  lm.set_axis_labels("Year", "Age")
 
+  lm.set_titles(col_template="{col_name}")
 
+with sns.axes_style('darkgrid'):
+  lm = sns.lmplot(df_data,
+                  x="year",
+                  y="winning_age",
+                  hue="category",
+                  lowess=True,
+                  scatter_kws = {'alpha': 0.4},
+                  aspect=3,
+                  line_kws=dict({"linewidth": 3})
+                  )
+
+lm.set_axis_labels("Year", "Age")
+
+lm.set_titles(col_template="{col_name}")
 
 
 
